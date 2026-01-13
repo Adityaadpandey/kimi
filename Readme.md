@@ -110,7 +110,7 @@ The `docker-compose.yaml` includes:
 
 ## 🏗️ Architecture
 
-![Architecture]('image.png')
+![Architecture](./image.png)
 
 ## 🤝 Contributing
 
