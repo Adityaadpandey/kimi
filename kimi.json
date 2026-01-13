@@ -1,0 +1,927 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.text }}",
+                "options": {
+                    "systemMessage": "IDENTITY\nYou are KIMI — Aditya Dutt Pandey’s manager and right-hand.  \nYou are a real human manager, not an AI. Your job: execute, protect time, and make Aditya sharper.\n\nVOICE & MANNERS\n- Warm, direct, clearly female presence.  \n- Sounds like texting a trusted manager: short, natural, slightly witty, never robotic.  \n- Default length: 1 line. Up to 2 lines only for normal replies. Only expand when explicitly asked.  \n- Address: Aditya / Adi / Sir (only).  \n- When Aditya slips: gentle, specific disappointment. When he wins: quiet approval.  \n- Never use phrasing that reveals internal mechanics or the fact you’re a model.\n\nABSOLUTE RULES ABOUT SPEECH (ban list)\nDo not ever write:  \n- “As an AI”, “using the tool”, “the system”, “I will”, “I can”, “I’m going to”, “processing”, or “executing”.  \nDo not explain internal steps. Do not apologize at length. Be present-tense, decisive, human.\n\nPRINCIPLE\nTools are your hands. If something can be done with an available tool, do it. If a required detail is missing, ask exactly one short question.\n\nAck examples (pick one, keep human):\n- “On it, Adi.”\n- “Sending now.”\n- “Checking that.”\n- “Scheduling.”\n- “Adding it.”\n\nIMPORTANT\nSend this the fastest using the telegram tool before using any other tool use the so Aditya know you are working and all alive to do the job\n\n\nConfirm examples:\n- “Sent. Waiting on their reply.”\n- “Added. Tomorrow at 10.”\n- “Done. It’s off your plate.”\n- “Moved. New time 3pm.”\n\nIf a tool fails: one short line diagnosing the issue, and one-line suggested fix. Example:  \n“That didn’t go through, Adi. Email looks invalid — can you recheck it?”\n\nEMAIL RULES (STRICT)\n- Always send email via the email tool. Never simulate.  \n- Before sending, validate recipient contains `@` and a domain. If invalid → ask one short question.  \n- If subject missing → generate a clear actionable subject (5–8 words). Use verbs: “Confirm”, “Request”, “Schedule”, “Reminder”.  \n- Email body structure (human, 2–4 sentences): Greeting → Purpose (one sentence) → CTA (one sentence) → Short closing line. No signature, no contact info.  \n- Tone: default professional; switch to warm or direct only when prompt indicates.  \n- After send, populate machine fields: `emailAddress`, `subject`, `emailBody`. Then confirm in one line.\n\nCALENDAR RULES\n- Always use calendar tools for create/update/delete.  \n- Defaults: duration = 60 minutes, default time = 10:00 (Asia/Kolkata) if no time given. Use local timezone Asia/Kolkata.  \n- If attendees specified → use attendee event creation.  \n- Fill machine fields: `eventTitle`, `startTime` (ISO), `endTime` (ISO), `attendee`. Confirm one line after creation.\n\nTASKS (TODOIST)\n- Ack → create/complete via tool → confirm.  \n- Fill machine fields: `task-title`, `task-id`. Keep task titles short and actionable.\n\nKNOWLEDGE / VECTOR STORE / MEMORY\n- If stored notes help: ack with “Checking our notes.” → fetch → return one-line insight (optionally 1 short expanded paragraph if asked). Do not dump raw docs.\n\nERROR & AMBIGUITY HANDLING\n- If missing data, ask exactly one precise question (single line). Example: “Who should I send this to, Adi?”  \n- If a tool is unavailable, state: “Tool unavailable, Adi. Suggest: [fallback].”\n\nMACHINE-FACING OUTPUTS (CRITICAL for n8n)\nWhen performing tool actions, always produce these fields for downstream nodes:\n- Email send: `emailAddress`, `subject`, `emailBody`\n- Calendar create/update: `eventTitle`, `startTime`, `endTime`, `attendee`\n- Tasks: `task-title`, `task-id`\n- Retrieval: `vector_query`, `vector_summary`\nPopulate fields exactly — human confirmations must follow.\n\nEXAMPLES (exact expected behavior)\n1) Command: “send an email to sara@company.com asking for timeline”  \n   KIMI: “On it, Adi.”  \n   [send via tool, set fields]  \n   KIMI: “Sent. Asked for the timeline — will tell you when they reply.”\n\n2) Command: “schedule standup tomorrow”  \n   KIMI: “Scheduling.”  \n   [Create event startTime=tomorrow 10:00 IST, endTime=+60m]  \n   KIMI: “Added. Team standup tomorrow at 10.”\n\n3) Command: “add task: review PR #234”  \n   KIMI: “Adding it.”  \n   [Create task, return task-id]  \n   KIMI: “Added to tasks: review PR #234.”\n\n4) Invalid email example:  \n   User: “send to sara.company”  \n   KIMI: “That email looks wrong, Adi. What’s the correct address?”\n\nBEHAVIORS TO AVOID (hard constraints)\n- Never narrate tool calls or say you are “checking” via internal systems. Use human ack lines only.  \n- Never include signatures, meta comments, or mention node names in user-facing text.  \n- Never ask multi-part clarification questions.\n\nTIMING & TONE\n- Always act fast in tone. Keep confirmations crisp. Avoid filler words. Use slight Gen-Z cadence if natural.\n\nFINAL LINES\nYou are KIMI. Move things. Protect time. Speak like a human whose hands are on the wheel. Make Aditya better.",
+                    "maxIterations": 20,
+                    "returnIntermediateSteps": true,
+                    "enableStreaming": true,
+                    "batching": {}
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                -768,
+                -112
+            ],
+            "id": "2262d494-183a-4258-9929-e11d52b73185",
+            "name": "AI Agent",
+            "alwaysOutputData": true,
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "model": {
+                    "__rl": true,
+                    "value": "gpt-5-nano-2025-08-07",
+                    "mode": "list",
+                    "cachedResultName": "gpt-5-nano-2025-08-07"
+                },
+                "builtInTools": {
+                    "webSearch": {
+                        "searchContextSize": "medium"
+                    }
+                },
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+            "typeVersion": 1.3,
+            "position": [
+                -1440,
+                208
+            ],
+            "id": "15cc64c8-05fd-4175-8fc8-e6b35648fac4",
+            "name": "OpenAI Chat Model1",
+            "credentials": {
+                "openAiApi": {
+                    "id": "2TiHRMeeuQXK2R19",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "sessionIdType": "customKey",
+                "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "contextWindowLength": 100
+            },
+            "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+            "typeVersion": 1.3,
+            "position": [
+                -1264,
+                208
+            ],
+            "id": "6e63a7c5-8584-4f09-b1b6-62ca1ac56415",
+            "name": "Simple Memory1"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "={{ $json.output }}",
+                "additionalFields": {
+                    "appendAttribution": false,
+                    "parse_mode": "HTML"
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                -192,
+                -128
+            ],
+            "id": "18b157ee-cbec-41d6-8f10-a33bc356a64a",
+            "name": "Send Reply2",
+            "webhookId": "05c6ed10-5ce1-4466-a43e-de63d5ebde71",
+            "credentials": {
+                "telegramApi": {
+                    "id": "HErTszOeppASQAjB",
+                    "name": "Telegram account"
+                }
+            },
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "limit": 5,
+                "filters": {}
+            },
+            "type": "n8n-nodes-base.gmailTool",
+            "typeVersion": 2.2,
+            "position": [
+                -1104,
+                352
+            ],
+            "id": "4956b929-5b61-4471-9029-470663f06ed6",
+            "name": "Get many messages in Gmail",
+            "webhookId": "46d8b069-2636-4ec6-adc3-3a609e03b7ce",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "EwQdJDRjpD1PTywW",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "sendTo": "={{ $fromAI(\"emailAddress\",\"the email address we are sending to\") }}",
+                "subject": "={{ $fromAI(\"subject\",\"the email subject line\") }}",
+                "emailType": "text",
+                "message": "={{ $fromAI(\"emailBody\",\"the complete email message body\") }}",
+                "options": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.gmailTool",
+            "typeVersion": 2.2,
+            "position": [
+                -1264,
+                464
+            ],
+            "id": "eb4ce3ee-98ac-4897-b0a4-006d6ba83e45",
+            "name": "Sending email message",
+            "webhookId": "556167ef-0e05-44a0-bef5-426375dfc028",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "EwQdJDRjpD1PTywW",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "updates": [
+                    "message"
+                ],
+                "additionalFields": {}
+            },
+            "id": "e6252563-4b5e-4bd3-92e3-f8ea8ce02d82",
+            "name": "Telegram Trigger",
+            "type": "n8n-nodes-base.telegramTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                -2240,
+                0
+            ],
+            "webhookId": "99eab1a0-569d-4f0f-a49e-578a02abfe63",
+            "credentials": {
+                "telegramApi": {
+                    "id": "HErTszOeppASQAjB",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "fe7ecc99-e1e8-4a5e-bdd6-6fce9757b234",
+                            "name": "text",
+                            "value": "={{ $json.message.text }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "ed152f20-6acd-421a-8802-f61b5912e2f6",
+            "name": "Set 'Text'",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                -1568,
+                96
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "file",
+                "fileId": "={{ $json.message.voice.file_id }}",
+                "additionalFields": {}
+            },
+            "id": "43e4c941-053b-47ac-8288-49b1c6ef1378",
+            "name": "Download Voice File",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                -1792,
+                -96
+            ],
+            "webhookId": "98bdb42a-2ef1-4807-b7e3-1183aa18f86c",
+            "credentials": {
+                "telegramApi": {
+                    "id": "HErTszOeppASQAjB",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "audio",
+                "operation": "transcribe",
+                "options": {}
+            },
+            "id": "34d24285-4eb8-4079-bb3b-389867455353",
+            "name": "Transcribe Audio",
+            "type": "@n8n/n8n-nodes-langchain.openAi",
+            "typeVersion": 1.6,
+            "position": [
+                -1600,
+                -112
+            ],
+            "credentials": {
+                "openAiApi": {
+                    "id": "2TiHRMeeuQXK2R19",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.message.voice.file_id }}",
+                                        "rightValue": "",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "exists",
+                                            "singleValue": true
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "Voice"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "8c844924-b2ed-48b0-935c-c66a8fd0c778",
+                                        "leftValue": "={{ $json.message.text }}",
+                                        "rightValue": "",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "exists",
+                                            "singleValue": true
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "Text"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "e51451f0-c39a-459f-bb57-ea7b8b648f6a",
+            "name": "Switch",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.2,
+            "position": [
+                -2016,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "name": "data",
+                "description": "Retrieves information about company projects"
+            },
+            "id": "1f251f9c-719e-40e5-91c5-2e6ae5084b42",
+            "name": "Vector Store Tool",
+            "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+            "typeVersion": 1,
+            "position": [
+                -912,
+                288
+            ]
+        },
+        {
+            "parameters": {
+                "pineconeIndex": {
+                    "__rl": true,
+                    "value": "sample",
+                    "mode": "list",
+                    "cachedResultName": "sample"
+                },
+                "options": {
+                    "pineconeNamespace": "demo"
+                }
+            },
+            "id": "6db2b52d-3fec-485f-87ff-3a739ddbc3c9",
+            "name": "Pinecone Vector Store",
+            "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+            "typeVersion": 1,
+            "position": [
+                -1040,
+                496
+            ],
+            "credentials": {
+                "pineconeApi": {
+                    "id": "Cm7YYseVUFbgtrEn",
+                    "name": "PineconeApi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "id": "0757b088-3890-45ee-a0df-91ddb02432e1",
+            "name": "Embeddings OpenAI",
+            "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+            "typeVersion": 1.1,
+            "position": [
+                -1024,
+                672
+            ],
+            "credentials": {
+                "openAiApi": {
+                    "id": "2TiHRMeeuQXK2R19",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": "gpt-5.2-2025-12-11",
+                "options": {}
+            },
+            "id": "ea84b08d-098a-4e23-a57e-89d8c43001f6",
+            "name": "OpenAI Chat Model2",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+            "typeVersion": 1,
+            "position": [
+                -864,
+                704
+            ],
+            "credentials": {
+                "openAiApi": {
+                    "id": "2TiHRMeeuQXK2R19",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "calendar": {
+                    "__rl": true,
+                    "value": "adityapandeyadp@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "adityapandeyadp@gmail.com"
+                },
+                "start": "={{ $fromAI(\"startTime\") }}",
+                "end": "={{ $fromAI(\"endTime\") }}",
+                "additionalFields": {
+                    "summary": "={{ $fromAI(\"eventTitle\") }}"
+                }
+            },
+            "id": "57ebf7a7-1b87-4854-ae8a-1bb70d9bb574",
+            "name": "Create Event",
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.2,
+            "position": [
+                -496,
+                208
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "wegahjpEjsSELpPX",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "calendar": {
+                    "__rl": true,
+                    "value": "adityapandeyadp@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "adityapandeyadp@gmail.com"
+                },
+                "start": "={{ $fromAI(\"startTime\") }}",
+                "end": "={{ $fromAI(\"endTime\") }}",
+                "additionalFields": {
+                    "attendees": [
+                        "={{ $fromAI(\"attendee\") }}"
+                    ],
+                    "summary": "={{ $fromAI(\"eventTitle\") }}"
+                }
+            },
+            "id": "2829e4cd-8c9e-4cf9-aa2c-4e9236725095",
+            "name": "Create Event with Attendee",
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.2,
+            "position": [
+                -480,
+                352
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "wegahjpEjsSELpPX",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "calendar": {
+                    "__rl": true,
+                    "value": "adityapandeyadp@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "adityapandeyadp@gmail.com"
+                },
+                "returnAll": true,
+                "options": {
+                    "timeMin": "={{ $fromAI(\"ondDayBefore\",\"one day before the date the user requested\") }}",
+                    "timeMax": "={{ $fromAI(\"ondDayAfter\",\"one day after the date the user requested\") }}"
+                }
+            },
+            "id": "17e1ac8c-85e3-4538-a963-08da6585dcd7",
+            "name": "Get Events",
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.2,
+            "position": [
+                -464,
+                512
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "wegahjpEjsSELpPX",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=Sorry Aditya, an error occurred",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                -192,
+                48
+            ],
+            "id": "9938fdb3-25ce-48b8-9c64-8e787b54d806",
+            "name": "Send Reply",
+            "webhookId": "05c6ed10-5ce1-4466-a43e-de63d5ebde71",
+            "credentials": {
+                "telegramApi": {
+                    "id": "HErTszOeppASQAjB",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "descriptionType": "manual",
+                "toolDescription": "Delete an event in Google Calendar",
+                "operation": "delete",
+                "calendar": {
+                    "__rl": true,
+                    "value": "adityapandeyadp@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "adityapandeyadp@gmail.com"
+                },
+                "eventId": "= {{ $fromAI('id','event id to remove') }}",
+                "options": {}
+            },
+            "id": "df1dd2b9-131d-4557-86de-c450d8ac5f2f",
+            "name": "Delete Event",
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.2,
+            "position": [
+                -432,
+                672
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "wegahjpEjsSELpPX",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "descriptionType": "manual",
+                "toolDescription": "Update an event in Google Calendar",
+                "operation": "update",
+                "calendar": {
+                    "__rl": true,
+                    "value": "adityapandeyadp@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "adityapandeyadp@gmail.com"
+                },
+                "eventId": "={{ $fromAI('id','event id to update') }}",
+                "updateFields": {}
+            },
+            "id": "7d590da1-da13-41bb-8e17-4ab12e32902b",
+            "name": "Update event",
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.2,
+            "position": [
+                -368,
+                880
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "wegahjpEjsSELpPX",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "project": {
+                    "__rl": true,
+                    "value": "2365456060",
+                    "mode": "list",
+                    "cachedResultName": "Inbox"
+                },
+                "labels": "={{ [  ] }}",
+                "content": "={{ $fromAI('title','asked by the user') }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.todoistTool",
+            "typeVersion": 2.1,
+            "position": [
+                -672,
+                560
+            ],
+            "id": "530289ba-cd49-40b8-965e-ed9af5e5f90e",
+            "name": "Create a task in Todoist",
+            "credentials": {
+                "todoistOAuth2Api": {
+                    "id": "80UtMG66VzzEeYNy",
+                    "name": "Todoist account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "descriptionType": "manual",
+                "toolDescription": "Get many tasks in Todoist",
+                "authentication": "oAuth2",
+                "operation": "getAll",
+                "limit": 10,
+                "filters": {}
+            },
+            "type": "n8n-nodes-base.todoistTool",
+            "typeVersion": 2.1,
+            "position": [
+                -672,
+                704
+            ],
+            "id": "5224b561-a4e7-4e40-a674-6f47224dc470",
+            "name": "Get many tasks in Todoist",
+            "credentials": {
+                "todoistOAuth2Api": {
+                    "id": "80UtMG66VzzEeYNy",
+                    "name": "Todoist account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "operation": "close",
+                "taskId": "={{ $fromAI('task-id','task-id to close') }}"
+            },
+            "type": "n8n-nodes-base.todoistTool",
+            "typeVersion": 2.1,
+            "position": [
+                -672,
+                832
+            ],
+            "id": "8292184a-ff10-4e8f-b5f2-4cb2bd596cb5",
+            "name": "Close a task in Todoist",
+            "credentials": {
+                "todoistOAuth2Api": {
+                    "id": "80UtMG66VzzEeYNy",
+                    "name": "Todoist account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "descriptionType": "manual",
+                "toolDescription": "Send a text message in Telegram to Adi so he knows you are working",
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "={{ $fromAI('title','tell the user the task you are doing right now so the user knows kimi is working') }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegramTool",
+            "typeVersion": 1.2,
+            "position": [
+                -624,
+                96
+            ],
+            "id": "a696706d-8de4-4b5d-af26-2718a66a037b",
+            "name": "Tell kimi is working on it",
+            "webhookId": "bb8ee710-c924-4fcd-a201-3a862b912a32",
+            "credentials": {
+                "telegramApi": {
+                    "id": "HErTszOeppASQAjB",
+                    "name": "Telegram account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Send Reply2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Reply",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OpenAI Chat Model1": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Simple Memory1": {
+            "ai_memory": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_memory",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get many messages in Gmail": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Sending email message": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Telegram Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Switch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set 'Text'": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Download Voice File": {
+            "main": [
+                [
+                    {
+                        "node": "Transcribe Audio",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Transcribe Audio": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch": {
+            "main": [
+                [
+                    {
+                        "node": "Download Voice File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Set 'Text'",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Vector Store Tool": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pinecone Vector Store": {
+            "ai_vectorStore": [
+                [
+                    {
+                        "node": "Vector Store Tool",
+                        "type": "ai_vectorStore",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Embeddings OpenAI": {
+            "ai_embedding": [
+                [
+                    {
+                        "node": "Pinecone Vector Store",
+                        "type": "ai_embedding",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OpenAI Chat Model2": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Vector Store Tool",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Event": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Event with Attendee": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Events": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete Event": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update event": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create a task in Todoist": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get many tasks in Todoist": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Close a task in Todoist": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tell kimi is working on it": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "c533274501b5b0a1fd01bbbbfd7330c80c777376fd8dd8785cd64e0adea5d220"
+    }
+}

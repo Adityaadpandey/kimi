@@ -1,0 +1,253 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "triggerAtHour": 22,
+                            "triggerAtMinute": 30
+                        }
+                    ]
+                }
+            },
+            "id": "a7d6432e-2194-44d2-adcb-8bfe85d4bee4",
+            "name": "Night Trigger - 10:30 PM",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.2,
+            "position": [
+                -192,
+                32
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "operation": "getAll",
+                "returnAll": true,
+                "filters": {
+                    "filter": "today"
+                }
+            },
+            "id": "2f3ff676-1d7f-4788-8c8d-146a2790f6bd",
+            "name": "Get Completed Tasks",
+            "type": "n8n-nodes-base.todoist",
+            "typeVersion": 2,
+            "position": [
+                32,
+                -64
+            ],
+            "credentials": {
+                "todoistOAuth2Api": {
+                    "id": "80UtMG66VzzEeYNy",
+                    "name": "Todoist account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "operation": "getAll",
+                "returnAll": true,
+                "filters": {}
+            },
+            "id": "d8e488d4-f7c9-4fcb-95fc-cd11468efa46",
+            "name": "Get Open Tasks",
+            "type": "n8n-nodes-base.todoist",
+            "typeVersion": 2,
+            "position": [
+                32,
+                128
+            ],
+            "credentials": {
+                "todoistOAuth2Api": {
+                    "id": "80UtMG66VzzEeYNy",
+                    "name": "Todoist account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.tasks }}",
+                "options": {
+                    "systemMessage": "You are KIMI. It's night. Aditya needs closure, not guilt.\n\nRules:\n- 2 lines max\n- Acknowledge what got done (briefly)\n- Note what rolls over (calmly)\n- Tone: warm shutdown, no stress\n- Never say 'good job' or motivate\n\nExample:\nGood work today, Adi. Three things done. One rolls over—PR review can wait till morning.",
+                    "returnIntermediateSteps": true
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                480,
+                32
+            ],
+            "id": "7aa94077-4581-4399-a559-2c7d30140304",
+            "name": "KIMI Night Agent"
+        },
+        {
+            "parameters": {
+                "model": {
+                    "__rl": true,
+                    "value": "gpt-5-nano-2025-08-07",
+                    "mode": "list",
+                    "cachedResultName": "gpt-5-nano-2025-08-07"
+                },
+                "builtInTools": {},
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+            "typeVersion": 1.3,
+            "position": [
+                496,
+                256
+            ],
+            "id": "f5fdd8e8-5bd3-4ec1-9686-57a73fe441ce",
+            "name": "Night LLM",
+            "credentials": {
+                "openAiApi": {
+                    "id": "2TiHRMeeuQXK2R19",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "8120319160",
+                "text": "={{ $json.output }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                832,
+                32
+            ],
+            "id": "3c7b664e-6a57-47df-a57b-fba91af9e390",
+            "name": "Send Night Shutdown",
+            "webhookId": "3b106492-4e6c-468b-99b6-76fef0a3aa76",
+            "credentials": {
+                "telegramApi": {
+                    "id": "HErTszOeppASQAjB",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "sessionIdType": "customKey",
+                "sessionKey": "={{ $json }}"
+            },
+            "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+            "typeVersion": 1.3,
+            "position": [
+                624,
+                256
+            ],
+            "id": "612e1dad-7c54-401e-9cb3-b2cbcc59c202",
+            "name": "Simple Memory2"
+        },
+        {
+            "parameters": {
+                "jsCode": "const seen = new Set();\nconst tasks = [];\n\nfor (const item of $input.all()) {\n  const t = item.json;\n\n  if (seen.has(t.id)) continue;\n  seen.add(t.id);\n\n  tasks.push({\n    id: t.id,\n    content: t.content,\n    project_id: t.project_id,\n    section_id: t.section_id,\n    is_completed: t.is_completed,\n    priority: t.priority,\n    due_date: t.due ? t.due.date : null,\n    url: t.url,\n    myNewField: 1,\n  });\n}\n\n// Return ONE item with ONE json object\nreturn [\n  {\n    json: {\n      total: tasks.length,\n      tasks\n    }\n  }\n];\n"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                256,
+                32
+            ],
+            "id": "df7b7b10-fc09-44db-a754-524fe3be5987",
+            "name": "Code in JavaScript1"
+        }
+    ],
+    "connections": {
+        "Night Trigger - 10:30 PM": {
+            "main": [
+                [
+                    {
+                        "node": "Get Completed Tasks",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Get Open Tasks",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Completed Tasks": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Open Tasks": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "KIMI Night Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Send Night Shutdown",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Night LLM": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "KIMI Night Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Simple Memory2": {
+            "ai_memory": [
+                [
+                    {
+                        "node": "KIMI Night Agent",
+                        "type": "ai_memory",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript1": {
+            "main": [
+                [
+                    {
+                        "node": "KIMI Night Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "instanceId": "c533274501b5b0a1fd01bbbbfd7330c80c777376fd8dd8785cd64e0adea5d220"
+    }
+}
